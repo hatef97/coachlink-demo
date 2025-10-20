@@ -9,4 +9,5 @@ urlpatterns = [
     path("api/", include("profiles.urls")),
     path("api/", include("messaging.urls")),
     path("api/", include("coaches.urls")),
+    path("api/", include("notifications.urls")),
 ]

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'profiles',
     'messaging',
     'coaches',
+    'notifications',
 ]
 
 MIDDLEWARE = [
