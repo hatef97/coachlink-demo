@@ -10,4 +10,5 @@ urlpatterns = [
     path("api/", include("messaging.urls")),
     path("api/", include("coaches.urls")),
     path("api/", include("notifications.urls")),
+    path("api/", include("calendarx.urls")),
 ]
