@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 
-from .models import Message
+from .models import Message, ChatThread
 
 
 
@@ -23,9 +23,36 @@ class MessageCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("You cannot message yourself.")
         return attrs
 
-    def create(self, validated_data):
-        validated_data["sender"] = self.context["request"].user
-        return super().create(validated_data)
+    def create(self, validated):
+        req = self.context["request"]
+        thread = ChatThread.get_pair(req.user.id, validated["receiver"].id)
+        return Message.objects.create(
+            sender=req.user,
+            receiver=validated["receiver"],
+            content=validated["content"],
+            thread=thread,
+        )
+
+
+
+class ThreadSerializer(serializers.ModelSerializer):
+    other = serializers.SerializerMethodField()
+    last_message = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChatThread
+        fields = ("id", "other", "updated_at", "last_message")
+
+    def get_other(self, obj):
+        u = self.context["request"].user
+        other = obj.user_b if obj.user_a_id == u.id else obj.user_a
+        return {"id": other.id, "email": other.email}
+
+    def get_last_message(self, obj):
+        m = obj.messages.order_by("-id").first()
+        if not m:
+            return None
+        return {"id": m.id, "content": m.content, "created_at": m.created_at}
 
 
 

@@ -3,9 +3,9 @@ from rest_framework.response import Response
 
 from django.db.models import Q
 
-from .models import Message
+from .models import Message, ChatThread
 from .serializers import (
-    MessageCreateSerializer, MessageSerializer, MarkReadSerializer
+    MessageCreateSerializer, MessageSerializer, MarkReadSerializer, ThreadSerializer
 )
 from .permissions import IsParticipant
 
@@ -53,3 +53,27 @@ class MessageDetailView(mixins.UpdateModelMixin,
     def patch(self, request, *args, **kwargs):
         self.check_object_permissions(request, self.get_object())
         return self.partial_update(request, *args, **kwargs)
+
+
+
+class ThreadListView(generics.ListAPIView):
+    serializer_class = ThreadSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        u = self.request.user
+        return ChatThread.objects.filter(models.Q(user_a=u) | models.Q(user_b=u)).prefetch_related("messages","user_a","user_b").order_by("-updated_at")
+
+
+
+class ThreadMessagesView(generics.ListAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        u = self.request.user
+        thread_id = self.kwargs["thread_id"]
+        thread = ChatThread.objects.get(pk=thread_id)
+        if u.id not in (thread.user_a_id, thread.user_b_id):
+            self.permission_denied(self.request, message="Not your thread.")
+        return Message.objects.filter(thread=thread).select_related("sender","receiver").order_by("-created_at")
