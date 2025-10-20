@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     # Local apps
     'core',     # ← custom user app
     'profiles',
+    'messaging',
 ]
 
 MIDDLEWARE = [
