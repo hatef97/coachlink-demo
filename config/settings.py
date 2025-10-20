@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'core',     # ← custom user app
     'profiles',
     'messaging',
+    'coaches',
 ]
 
 MIDDLEWARE = [
