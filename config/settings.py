@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'django_filters',
     # Local apps
     'core',     # ← custom user app
+    'profiles',
 ]
 
 MIDDLEWARE = [
